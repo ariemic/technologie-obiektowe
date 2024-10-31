@@ -31,48 +31,37 @@ public class PhotoDownloader {
         return Observable.fromIterable(photosUrl)
                 .map(this::getPhoto);
 
+        //? w którym momencie wywołuje się getPhoto
+        //dla każdego linku synchronicznie
     }
-
-//    public List<Photo> searchForPhotos(String searchQuery) throws IOException, InterruptedException {
-//
-//        List<Photo> photos = new ArrayList<>();
-//        List<String> photoUrls = DuckDuckGoDriver.searchForImages(searchQuery);
-//
-//        for (String photoUrl : photoUrls) {
-//            try {
-//                photos.add(getPhoto(photoUrl));
-//            } catch (IOException e) {
-//                log.log(Level.WARNING, "Could not download a photo", e);
-//            }
-//        }
-//        return photos;
-//    }
 
     public Observable<Photo> searchForPhotos(String searchQuery) throws IOException, InterruptedException {
 
         return Observable.create(observer -> {
-            try {
-                //observable from collable then flatMap on observable on iterable to download photos
-                // , we treak photoUrls as a source
+            try{
+
                 List<String> photoUrls = DuckDuckGoDriver.searchForImages(searchQuery);
+
                 for (String photoUrl : photoUrls) {
                     if(observer.isDisposed()){
                         break;
                     }
                     try {
-                        observer.onNext(getPhoto(photoUrl));
+                       observer.onNext(getPhoto(photoUrl));
                     } catch (IOException e) {
+
                         log.log(Level.WARNING, "Could not download a photo", e);
                     }
                 }
                 observer.onComplete();
-            } catch (IOException | InterruptedException e) {
+            }catch (IOException | InterruptedException e){
                 observer.onError(e);
             }
         });
 
     }
 
+    
 
     private Photo getPhoto(String photoUrl) throws IOException {
         log.info("Downloading... " + photoUrl);

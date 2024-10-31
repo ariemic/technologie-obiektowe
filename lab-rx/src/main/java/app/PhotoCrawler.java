@@ -45,8 +45,13 @@ public class PhotoCrawler {
         photoDownloader.searchForPhotos(query)
                 .take(10)
                 .subscribe(photoSerializer::savePhoto,
-                        error -> log.log());
+                        error -> log.log(Level.SEVERE, "Downloading photo examples error", error));
+
     }
+// Czy sposób obsługi Observable po stronie PhotoCrawler różni się w obu przykładach?
+// nie trzeba robić try catcha w downloadPhotosForQuery -> zaimplementowane w samej metodzie
+//Jakie wzorce projektowe zostały tu wykorzystane? Iterator i Observer
+
 
     public void downloadPhotosForMultipleQueries(List<String> queries) {
         // TODO Implement me :(
