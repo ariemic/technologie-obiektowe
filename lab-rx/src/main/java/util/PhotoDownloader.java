@@ -2,6 +2,8 @@ package util;
 
 import driver.DuckDuckGoDriver;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import model.Photo;
 import org.apache.tika.Tika;
 
@@ -61,7 +63,19 @@ public class PhotoDownloader {
 
     }
 
-    
+
+    public Observable<Photo> searchForPhotos(List<String> searchQueries) throws IOException, InterruptedException {
+        return Observable.fromIterable(searchQueries)
+                .flatMap(query -> {
+                    try {
+                        return searchForPhotos(query);
+                    }catch (IOException | InterruptedException e){
+                        return Observable.error(e);
+                    }
+                })
+                .subscribeOn(Schedulers.io()); //powoduje że nasz flatMap będzie działac asynchronicznie
+    }
+
 
     private Photo getPhoto(String photoUrl) throws IOException {
         log.info("Downloading... " + photoUrl);

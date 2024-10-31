@@ -20,6 +20,9 @@ public class PhotoProcessor {
         return PhotoSize.resolve(photo) != PhotoSize.SMALL;
     }
 
+
+
+
     public Photo convertToMiniature(Photo photo) throws IOException {
         log.info("...Converting photo... : " + photo.getPhotoData().length);
         return resize(photo, 300, 200);

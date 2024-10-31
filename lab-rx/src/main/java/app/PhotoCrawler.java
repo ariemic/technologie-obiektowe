@@ -1,13 +1,18 @@
 package app;
 
+import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import model.Photo;
+import model.PhotoSize;
 import util.PhotoDownloader;
 import util.PhotoProcessor;
 import util.PhotoSerializer;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +39,9 @@ public class PhotoCrawler {
     public void downloadPhotoExamples() {
         try {
             Observable<Photo> downloadedExamples = photoDownloader.getPhotoExamples();
-            downloadedExamples.subscribe(photoSerializer::savePhoto);
+            downloadedExamples
+                    .compose(this::processPhotos)
+                    .subscribe(photoSerializer::savePhoto);
         } catch (IOException e) {
             log.log(Level.SEVERE, "Downloading photo examples error", e);
         }
@@ -44,6 +51,7 @@ public class PhotoCrawler {
         // TODO Implement me :(
         photoDownloader.searchForPhotos(query)
                 .take(10)
+                .compose(this::processPhotos)
                 .subscribe(photoSerializer::savePhoto,
                         error -> log.log(Level.SEVERE, "Downloading photo examples error", error));
 
@@ -53,7 +61,49 @@ public class PhotoCrawler {
 //Jakie wzorce projektowe zostały tu wykorzystane? Iterator i Observer
 
 
-    public void downloadPhotosForMultipleQueries(List<String> queries) {
-        // TODO Implement me :(
+    public void downloadPhotosForMultipleQueries(List<String> queries) throws IOException, InterruptedException {
+        photoDownloader.searchForPhotos(queries)
+                .take(10)
+                .subscribe(photoSerializer::savePhoto,
+                        error -> log.log(Level.SEVERE, "Downloading photo examples error", error));
     }
+
+//    public void downloadPhotosForMultipleQueries(List<String> queries) throws IOException, InterruptedException {
+//        Observable.fromIterable(queries)
+//                .flatMap(query -> photoDownloader.searchForPhotos(query).take(5))
+//                .compose(this::processPhotos)
+//                .subscribe(photoSerializer::savePhoto,
+//                        error -> log.log(Level.SEVERE, "Downloading photo examples error", error));
+//    }
+
+//    private Observable<Photo> processPhotos(Observable<Photo> photoObservable) {
+//        return photoObservable
+//                .filter(photoProcessor::isPhotoValid)
+//                .map(photoProcessor::convertToMiniature);
+//    }
+
+
+
+    private Observable<Photo> processPhotos(Observable<Photo> photoObservable) {
+        return photoObservable
+                .filter(photoProcessor::isPhotoValid)
+                .groupBy(PhotoSize::resolve)
+                .flatMap(groupedObservable -> {
+                    if (groupedObservable.getKey() == PhotoSize.MEDIUM) {
+                        return groupedObservable.buffer(5, TimeUnit.SECONDS)
+                                .flatMap(photos -> Observable.fromIterable(photos)
+                                        .map(photoProcessor::convertToMiniature));
+                    } else {
+                        return groupedObservable.observeOn(Schedulers.computation())
+                                .map(photoProcessor::convertToMiniature);
+                    }
+                })
+                .subscribeOn(Schedulers.io());
+    }
+
+
+
 }
+
+
+
