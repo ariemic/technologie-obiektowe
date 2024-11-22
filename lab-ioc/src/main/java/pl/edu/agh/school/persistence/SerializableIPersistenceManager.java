@@ -12,12 +12,16 @@ import pl.edu.agh.school.Teacher;
 import javax.inject.Named;
 
 public final class SerializableIPersistenceManager implements IPersistenceManager {
-
-    private static final Logger log = Logger.getInstance();
+    private final Logger log;
 
     private String teachersStorageFileName;
 
     private String classStorageFileName;
+
+    @Inject
+    public SerializableIPersistenceManager(Logger log) {
+        this.log = log;
+    }
 
 
     @Inject

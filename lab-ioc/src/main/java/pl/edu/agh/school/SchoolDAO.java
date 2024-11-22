@@ -9,7 +9,7 @@ import pl.edu.agh.school.persistence.SerializableIPersistenceManager;
 
 public class SchoolDAO {
 
-    public static final Logger log = Logger.getInstance();
+    private final Logger log;
 
     private final List<Teacher> teachers;
 
@@ -18,7 +18,8 @@ public class SchoolDAO {
     private final SerializableIPersistenceManager manager;
 
     @Inject
-    public SchoolDAO(SerializableIPersistenceManager persistenceManager) {
+    public SchoolDAO(Logger log, SerializableIPersistenceManager persistenceManager) {
+        this.log = log;
         manager = persistenceManager;
         teachers = manager.loadTeachers();
         classes = manager.loadClasses();

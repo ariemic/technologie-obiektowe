@@ -94,7 +94,8 @@ public class PhotoCrawler {
                                 .flatMap(photos -> Observable.fromIterable(photos)
                                         .map(photoProcessor::convertToMiniature));
                     } else {
-                        return groupedObservable.observeOn(Schedulers.computation())
+                        return groupedObservable
+                                .observeOn(Schedulers.computation())
                                 .map(photoProcessor::convertToMiniature);
                     }
                 })
