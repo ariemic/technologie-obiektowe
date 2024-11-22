@@ -12,6 +12,7 @@ import pl.edu.agh.logger.FileMessageSerializer;
 import pl.edu.agh.logger.Logger;
 import pl.edu.agh.school.*;
 import pl.edu.agh.school.guice.SchoolModule;
+import pl.edu.agh.school.persistence.SerializableIPersistenceManager;
 
 public class SchoolDemo {
 
@@ -21,7 +22,7 @@ public class SchoolDemo {
 
     public SchoolDemo() {
 //        school =  new School(new SchoolDAO(new SerializablePersistenceManager()));
-        Injector injector = Guice.createInjector((new SchoolModule()));
+        Injector injector = Guice.createInjector(new SchoolModule());
         school = injector.getInstance(School.class);
     }
 
@@ -37,6 +38,8 @@ public class SchoolDemo {
         schoolDemo.showClass();
         schoolDemo.showScheduleForClass();
         schoolDemo.showScheduleForTeacher();
+
+
     }
 
     public void initTeachers() {

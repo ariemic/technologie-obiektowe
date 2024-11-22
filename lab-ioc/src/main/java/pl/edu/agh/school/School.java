@@ -7,7 +7,7 @@ import java.util.Collection;
 
 public class School {
 
-    private SchoolDAO schoolDAO;
+    private final SchoolDAO schoolDAO;
 
     @Inject
     public School(SchoolDAO schoolDAO) {

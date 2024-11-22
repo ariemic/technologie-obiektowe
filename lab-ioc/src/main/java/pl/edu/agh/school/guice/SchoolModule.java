@@ -1,15 +1,20 @@
 package pl.edu.agh.school.guice;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import pl.edu.agh.school.persistence.IPersistenceManager;
-import pl.edu.agh.school.persistence.SerializableIPersistenceManager;
+import com.google.inject.name.Names;
+
 
 public class SchoolModule extends AbstractModule {
 
-    @Provides
-    IPersistenceManager providePersistenceManager(SerializableIPersistenceManager serializablePersistenceManager){
-        return serializablePersistenceManager;
+    @Override
+    protected void configure(){
+        bind(String.class)
+                .annotatedWith(Names.named("teachersStorageFileName"))
+                .toInstance("teachers.dat");
+
+        bind(String.class)
+                .annotatedWith(Names.named("classStorageFileName"))
+                .toInstance("classes.dat");
     }
 
 }
